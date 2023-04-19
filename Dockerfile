@@ -5,6 +5,6 @@ ENV PROJECT_HOME /opt/app
 COPY /target/data_relay.jar $PROJECT_HOME/app.jar
 
 WORKDIR $PROJECT_HOME
-EXPOSE 8081
+EXPOSE 8083
 CMD ["java" ,"-jar","./app.jar"]
 

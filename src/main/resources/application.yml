@@ -49,16 +49,16 @@ spring:
 #    resources:
 #      # 静态资源的配置位置，可以写成一个数组配置多个目录
 #      static-locations: classpath:/static/
-  mvc:
-    throw-exception-if-no-handler-found: true
-#    static-path-pattern: /static/**
-    view:
-      # 给返回的页面添加后缀名
-      suffix: .html
-      # 定位模板的目录
-      prefix: classpath:/templates/
-  thymeleaf:
-    cache: false
+#  mvc:
+#    throw-exception-if-no-handler-found: true
+##    static-path-pattern: /static/**
+#    view:
+#      # 给返回的页面添加后缀名
+#      suffix: .html
+#      # 定位模板的目录
+#      prefix: classpath:/templates/
+#  thymeleaf:
+#    cache: false
   # 服务模块
   devtools:
     restart:
