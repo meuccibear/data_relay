@@ -20,9 +20,11 @@ import com.zp.data_relay.utils.Constants;
 import com.zp.data_relay.utils.ObjectUtils;
 import com.zp.data_relay.utils.WebShellUtils;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+
 import java.io.IOException;
 
 /**
@@ -60,43 +62,53 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Override
     public void recvHandle(ScriptData scriptData, WebSocketSession webSocketSession) {
-        String sessionId = scriptData.getSessionId();
+        String uuid = WebShellUtils.getUuid(webSocketSession);
 
-        switch (scriptData.getOp()) {
+        log.info("【recvHandle】{} 收到用户数据:{}", uuid, scriptData);
+
+        switch (scriptData.getHeader().getOp()) {
             case "usertype":
-                ScriptConnectInfo scriptConnectInfo = Constants.SCRIPT_MAP.get(sessionId);
+                ScriptConnectInfo scriptConnectInfo = Constants.SCRIPT_MAP.get(uuid);
                 if (scriptConnectInfo != null) {
                     scriptConnectInfo.setUsertype((String) scriptData.getData());
                 }
+                String type = "user".equals(scriptConnectInfo.getUsertype()) ? "admin" : "user";
 //                toSessionId
-                if ("user".equals(scriptConnectInfo.getUsertype())) {
-                    for (ScriptConnectInfo item : Constants.SCRIPT_MAP.values()) {
-                        if ("admin".equals(item.getUsertype()) && ObjectUtils.isEmpty(item.getToUuid())) {
-                            item.setToUuid(sessionId);
-                            scriptConnectInfo.setToUuid(item.getUuid());
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("sessionId", item.getUuid());
-                            sendMessage(sessionId, jsonObject);
-                            jsonObject.put("sessionId", sessionId);
-                            sendMessage(item.getUuid(), jsonObject);
-                            return;
-                        }
+//                if ("user".equals(scriptConnectInfo.getUsertype())) {
+                for (ScriptConnectInfo item : Constants.SCRIPT_MAP.values()) {
+                    if (type.equals(item.getUsertype()) && ObjectUtils.isEmpty(item.getToUuid())) {
+                        item.setToUuid(uuid);
+                        scriptConnectInfo.setToUuid(item.getUuid());
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("sessionId", item.getUuid());
+                        sendMessage(uuid, jsonObject);
+                        jsonObject.put("sessionId", uuid);
+                        sendMessage(item.getUuid(), jsonObject);
+                        return;
                     }
                 }
+//                }
                 break;
             case "user":
             case "admin":
-                JSONObject data = BeanUtils.toJSONObject(scriptData.getData());
-                data.put("sessionId", sessionId);
+//                JSONObject data = BeanUtils.toJSONObject(scriptData.getData());
+//                data.put("sessionId", uuid);
 
-                if ("all".equals(scriptData.getToSessionId())) {
+//                if ("all".equals(scriptData.getToSessionId())) {
+                if ("all".equals(scriptData.getHeader().getToSessionId())) {
                     for (ScriptConnectInfo item : Constants.SCRIPT_MAP.values()) {
-                        if (!scriptData.getOp().equals(item.getUsertype())) {
-                            sendMessage(item.getWebSocketSession(), data);
+//                        if (!scriptData.getOp().equals(item.getUsertype())) {
+                        if (!scriptData.getHeader().getOp().equals(item.getUsertype())) {
+//                            sendMessage(item.getWebSocketSession(), data);
+                            sendMessage(item.getWebSocketSession(), scriptData.getData());
                         }
                     }
                 } else {
-                    sendMessage(null != scriptData.getToSessionId() ? scriptData.getToSessionId() : sessionId, data);
+//                    sendMessage(null != scriptData.getToSessionId() ? scriptData.getToSessionId() : uuid, data);
+
+                    if(!sendMessage(Constants.SCRIPT_MAP.get(uuid).getToUuid(), scriptData.getData())){
+                        sendMessage(Constants.SCRIPT_MAP.get(uuid).getWebSocketSession(), null);
+                    }
                 }
 
                 break;
@@ -122,11 +134,12 @@ public class ScriptServiceImpl implements ScriptService {
             //map中移除
             Constants.SCRIPT_MAP.remove(userId);
         }
-    }
-
-    void sendMessage(String sessionId, JSONObject context) {
-        ScriptConnectInfo scriptConnectInfo = Constants.SCRIPT_MAP.get(sessionId);
-        sendMessage(null != scriptConnectInfo ? scriptConnectInfo.getWebSocketSession() : null, context);
+        for (ScriptConnectInfo item : Constants.SCRIPT_MAP.values()) {
+            if (!item.getToUuid().isEmpty() && userId.equals(item.getToUuid())) {
+                item.setToUuid(null);
+                log.info("【close(取消关联)】{}", item.getUuid());
+            }
+        }
     }
 
     /**
@@ -136,16 +149,46 @@ public class ScriptServiceImpl implements ScriptService {
      * @author zmzhou
      * @date 2021/2/23 21:18
      */
-    public void sendMessage(WebSocketSession session, JSONObject data) {
+    /**
+     * 数据写回前端
+     *
+     * @param sessionId uuid
+     * @param data 数据
+     */
+    boolean sendMessage(String sessionId, Object data) {
+        boolean result = false;
+
+        if(null != sessionId) {
+            log.info("【sendMessage(转发).】{}", sessionId);
+            ScriptConnectInfo scriptConnectInfo = Constants.SCRIPT_MAP.get(sessionId);
+            sendMessage(null != scriptConnectInfo ? scriptConnectInfo.getWebSocketSession() : null, data);
+            result = true;
+        }
+
+        return result;
+    }
+
+    void sendMessage(WebSocketSession session, Object data) {
+        String content;
+        if (data instanceof String) {
+            content = data.toString();
+        } else if (data instanceof JSONObject) {
+            content = ((JSONObject)data).toJSONString();
+        } else {
+            content = JSON.toJSONString(data);
+        }
+        log.info("【sendMessage(转发)】{} {} ", session.getId(), content);
+
         try {
             if (null != session) {
-                String context = JSON.toJSONString(data);
-                session.sendMessage(new TextMessage(context.getBytes()));
+//                String context = JSON.toJSONString(data);
+                session.sendMessage(new TextMessage(content.getBytes()));
             }
         } catch (IOException e) {
             log.error("数据写回前端异常：", e);
         }
     }
+
 
 
 }

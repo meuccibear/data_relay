@@ -118,33 +118,33 @@ logging:
 #logstash:
 #  address: 192.168.163.132:4567
 
-#knife4j:
-#  enable: true
-#  setting:
-#    language: zh-CN
-#    enableSwaggerModels: true
-#    enableDocumentManage: true
-#    swaggerModelName: 实体类列表
-#    enableVersion: false
-#    enableReloadCacheParameter: false
-#    enableAfterScript: true
-#    enableFilterMultipartApiMethodType: POST
-#    enableFilterMultipartApis: true
-#    enableRequestCache: true
-#    enableHost: false
-#    enableHostText: 192.168.0.193:8000
-#    enableHomeCustom: true
-#    homeCustomLocation: classpath:markdown/home.md
-#    enableSearch: false
-#    enableFooter: true
-#    enableFooterCustom: true
-#    footerCustomContent: Apache License 2.0 | Copyright  2019-[广州智谱有限公司]
-#    enableDynamicParameter: false
-#    enableDebug: true
-#    enableOpenApi: false
-#    enableGroup: true
-#  cors: false
-#  production: false
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+    enableSwaggerModels: true
+    enableDocumentManage: true
+    swaggerModelName: 实体类列表
+    enableVersion: false
+    enableReloadCacheParameter: false
+    enableAfterScript: true
+    enableFilterMultipartApiMethodType: POST
+    enableFilterMultipartApis: true
+    enableRequestCache: true
+    enableHost: false
+    enableHostText: 192.168.0.193:8000
+    enableHomeCustom: true
+    homeCustomLocation: classpath:markdown/home.md
+    enableSearch: false
+    enableFooter: true
+    enableFooterCustom: true
+    footerCustomContent: Apache License 2.0 | Copyright  2019-[广州智谱有限公司]
+    enableDynamicParameter: false
+    enableDebug: true
+    enableOpenApi: false
+    enableGroup: true
+  cors: false
+  production: false
 #  basic:
 #    enable: true
 #    username: xiaozhuang
