@@ -68,11 +68,11 @@ spring:
 #    type: ehcache
 #    ehcache:
 #      config: classpath:ehcache.xml
-#  data:
-#    mongodb:
-#      host: localhost
-#      port: 27017
-#      database: helium
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: xhs
 #mybatis
 #mybatis-plus:
 #  mapper-locations: classpath*:/mapper/**/*.xml

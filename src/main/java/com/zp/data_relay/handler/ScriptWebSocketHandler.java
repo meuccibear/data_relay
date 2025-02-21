@@ -53,13 +53,13 @@ public class ScriptWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) {
         if (webSocketMessage instanceof TextMessage) {
-            String uuid = WebShellUtils.getUuid(webSocketSession);
+//            String uuid = WebShellUtils.getUuid(webSocketSession);
             String payload = ((TextMessage) webSocketMessage).getPayload();
             ScriptData scriptData = BeanUtils.toJavaObject(payload, new TypeReference<ScriptData>() {
             });
 
-            scriptData.setSessionId(uuid);
-            log.info("【recvHandle】{} 收到用户数据:{}", uuid, scriptData);
+//            scriptData.setSessionId(uuid);
+//            log.info("【recvHandle】{} 收到用户数据:{}", uuid, scriptData);
 
             //调用service接收消息
             scriptService.recvHandle(scriptData, webSocketSession);

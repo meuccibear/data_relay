@@ -31,9 +31,21 @@ public class ScriptData implements Serializable {
     /**
      * 操作类型
      */
-    private String op;
+//    private String op;
     private Object data;
-    private String toSessionId;
-    private String sessionId;
+//    private String toSessionId;
 
+    private Header header;
+
+
+    //@Slf4j
+    @Data
+    //@AllArgsConstructor
+    //@NoArgsConstructor
+    public class Header {
+        private String op;
+        private String toSessionId;
+    }
 }
+
+
